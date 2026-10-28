@@ -58,7 +58,9 @@ du build.
 
 ## Mise en service (une seule fois)
 
-1. Créer le dépôt GitHub et y pousser ce dossier.
+1. Dépôt GitHub : `patrick-reybaud/electro-crea.com` (créé le 28/10/2026, branche `main`). Chaque enregistrement
+   fait dans `/admin/` crée un commit dessus, comme pour pacabot.com ; la connexion à `/admin/` se fait avec le compte
+   GitHub (ou un jeton personnel, bouton « Sign in with a personal access token »).
 2. Dans l'espace client OVH : Hébergement → Multisite → ajouter `electro-crea.com` et `www.electro-crea.com`, dossier
    racine `electro-crea`, SSL activé.
 3. Faire pointer le DNS de electro-crea.com (déjà chez OVH) vers l'hébergement.

@@ -7,8 +7,11 @@ debut: 2020
 fin: 2022
 statut: en pause
 cover: ./cover.jpg
-coverAlt: Une mécanique d'accordage récupérée, fixée au bout d'un profilé d'aluminium, la corde tendue au-dessus
+coverAlt: Le monocorde dressé à la verticale sur l'établi, profilé d'aluminium, corde tendue, fils et pinces crocodile vers l'alimentation
 galerie:
+  - src: ./galerie-11.jpg
+    alt: Une mécanique d'accordage récupérée, fixée au bout d'un profilé d'aluminium, la corde tendue au-dessus
+    legende: La mécanique d'accordage, récupérée sur une guitare
   - src: ./galerie-1.jpg
     alt: Le premier banc d'essai sur l'établi en 2020, une planche, des bobines, un oscilloscope allumé derrière
     legende: Le premier banc, mars 2020, avec l'oscilloscope qui montre la corde osciller

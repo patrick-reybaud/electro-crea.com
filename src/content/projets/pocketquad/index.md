@@ -7,7 +7,7 @@ debut: 2013
 fin: 2013
 statut: terminé
 cover: ./cover.jpg
-coverAlt: Le Pocket Quad en vol stationnaire au-dessus d'un ordinateur portable, sur l'établi
+coverAlt: Le Pocket Quad en vol dans l'atelier, image tirée de la vidéo des premiers vols, juillet 2013
 galerie:
   - src: ./galerie-1.jpg
     alt: Le quadricoptère et ses protections d'hélices, vu de dessus en vol au-dessus d'une moquette

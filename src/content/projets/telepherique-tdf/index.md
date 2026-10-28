@@ -8,11 +8,11 @@ fin: 2004
 statut: terminé
 ordre: 10
 cover: ./cover.jpg
-coverAlt: La gare du téléphérique au fond du jardin, portique vert et câble tendu, une cabine jaune suspendue
+coverAlt: Deux cabines jaunes suspendues au câble, au-dessus du jardin
 galerie:
-  - src: ./galerie-1.jpg
-    alt: Deux cabines jaunes suspendues au câble, au-dessus du jardin
-    legende: Les cabines
+  - src: ./galerie-7.jpg
+    alt: La gare du téléphérique au fond du jardin, portique vert et câble tendu, une cabine jaune suspendue
+    legende: La gare, sous la tonnelle
   - src: ./galerie-2.jpg
     alt: Le pupitre de commande, interrupteurs, rangée de voyants, afficheur à deux chiffres et petit automate à écran
     legende: Le pupitre
