@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+import { getReglages } from '../lib/content';
+
+const r = await getReglages();
+---
+
+<Base title="Mentions légales">
+  <section class="wrap section-tight prose">
+    <h1>Mentions légales</h1>
+    <h2>Éditeur</h2>
+    <p>{r.nom}<br />{r.lieu}<br />Contact : {r.email}</p>
+    <p>Directeur de la publication : {r.directeurPublication}</p>
+    <h2>Hébergement</h2>
+    <p>OVH SAS, 2 rue Kellermann, 59100 Roubaix, France — ovhcloud.com</p>
+    <h2>Données personnelles</h2>
+    <p>
+      Ce site ne dépose aucun cookie et n'utilise aucun outil de mesure d'audience. Les polices de caractères sont
+      servies depuis le site lui-même. Les vidéos YouTube ne sont chargées que si vous cliquez dessus ; elles sont alors
+      lues depuis youtube-nocookie.com, soumis aux règles de confidentialité de YouTube. Les informations transmises par
+      e-mail ne servent qu'à répondre aux demandes.
+    </p>
+    <h2>Contenus</h2>
+    <p>
+      Les textes et photos sont de {r.nom}, sauf mention sur la page. Les œuvres présentées dans la rubrique « Art et
+      installations » appartiennent à leurs artistes. Les fichiers publiés restent soumis à la licence indiquée sur
+      leur page et dans leur dépôt.
+    </p>
+  </section>
+</Base>

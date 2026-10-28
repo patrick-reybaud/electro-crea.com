@@ -1,0 +1,15 @@
+# Réglages du site, modifiables depuis /admin.
+site:
+  nom: "Patrick Reybaud"
+  email: "patrick.reybaud@electro-crea.com"
+  lieu: "Marseille"
+  accroche: "Réparer, récupérer, fabriquer. Mes projets personnels."
+  directeurPublication: "Patrick Reybaud"
+  autresSites:
+    - nom: Ondulab
+      url: "https://ondulab.com"
+      description: "l'instrument Sp3ctra"
+    - nom: Pacabot
+      url: "https://pacabot.com"
+      description: "club de robotique"
+  github: "https://github.com/patrick-reybaud"

@@ -1,0 +1,229 @@
+---
+import { getEntry } from 'astro:content';
+import Img from '../components/Img.astro';
+import ProjetCard from '../components/ProjetCard.astro';
+import Base from '../layouts/Base.astro';
+import { getALaUne, getCarnet, getProjets, periode, slugUrl } from '../lib/content';
+import { THEMES } from '../content.config';
+
+const bandeau = await getEntry('projets', 'uher-4200');
+const alaune = await getALaUne(3);
+const projets = await getProjets('projet');
+const reparations = (await getProjets('reparation')).slice(0, 3);
+const archives = await getProjets('archive');
+const carnet = await getCarnet();
+const nbReparations = (await getProjets('reparation')).length + carnet.length;
+const themes = (Object.keys(THEMES) as (keyof typeof THEMES)[]).map((k) => ({
+  key: k,
+  ...THEMES[k],
+  n: projets.filter((p) => p.data.theme === k).length,
+}));
+---
+
+<Base>
+  <section class="wrap hero">
+    <div class="hero-text">
+      <p class="eyebrow">Projets perso, réparations et archives</p>
+      <h1>Réparer, récupérer, fabriquer.</h1>
+      <p class="lead">
+        Passionné d'ingénierie et d'art numérique, j'aime démonter, réparer et créer. J'utilise autant que possible des
+        pièces et du matériel de réemploi pour mes projets. J'aime concevoir des solutions qui améliorent le confort au
+        quotidien. Je partage ici mes réalisations et toutes les ressources utiles pour les refaire.
+      </p>
+      <div class="actions">
+        <a href="/projets/" class="btn btn-primary">Voir les projets</a>
+        <a href="/reparations/" class="btn">Le carnet de réparations</a>
+      </div>
+    </div>
+    {bandeau?.data.cover && (
+      <figure class="hero-fig">
+        <a href={slugUrl(bandeau)}>
+          <Img src={bandeau.data.cover} alt={bandeau.data.coverAlt ?? bandeau.data.title} widths={[640, 960, 1280]} sizes="(min-width: 1200px) 600px, 100vw" loading="eager" />
+        </a>
+        <figcaption class="caption">{bandeau.data.coverAlt ?? bandeau.data.title}</figcaption>
+      </figure>
+    )}
+  </section>
+
+  {alaune.length > 0 && (
+    <section class="wrap section-tight">
+      <div class="section-head">
+        <h2>À la une</h2>
+        <span class="mono muted">Les dernières fiches</span>
+      </div>
+      <div class="cards">{alaune.map((p) => <ProjetCard projet={p} meta="rubrique" eager />)}</div>
+    </section>
+  )}
+
+  <section class="wrap section-tight">
+    <div class="section-head">
+      <h2>Par thème</h2>
+      <a href="/projets/">Tous les projets →</a>
+    </div>
+    <ul class="themes">
+      {themes.filter((t) => t.n > 0).map((t) => (
+        <li>
+          <a href={`/projets/#${t.key}`}>
+            <span class="theme-name">{t.label}</span>
+            <span class="theme-line">{t.ligne}<br /><span class="mono muted">{t.n} {t.n > 1 ? 'fiches' : 'fiche'}</span></span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="band">
+    <div class="wrap section">
+      <div class="section-head">
+        <h2>Archives, 1994–2008</h2>
+        <a href="/archives/">Toutes les archives →</a>
+      </div>
+      <p class="lead band-lead">
+        Les premiers projets, faits avec ce qu'on trouvait : un téléphérique de jardin construit uniquement en
+        récupération, des planeurs en balsa, une table de découpe au fil chaud. Les photos sont des tirages numérisés
+        bien plus tard.
+      </p>
+      <div class="cards">{archives.slice(0, 3).map((p) => <ProjetCard projet={p} meta="rubrique" />)}</div>
+    </div>
+  </section>
+
+  <section class="wrap section-tight carnet">
+    <div class="carnet-text">
+      <h2>Carnet de réparations</h2>
+      <p class="lead">
+        Les appareils de la maison, ouverts plutôt que jetés. Pour chacun : la panne, la cause, ce qui a marché, et ce
+        que ça a coûté par rapport au neuf.
+      </p>
+      <a href="/reparations/" class="btn">Tout le carnet ({nbReparations} réparations)</a>
+    </div>
+    <ol class="carnet-list">
+      {reparations.map((p) => (
+        <li>
+          <a href={slugUrl(p)}>
+            <span class="mono muted">{periode(p.data)}</span>
+            <strong>{p.data.title}</strong>
+            <span class="muted">{p.data.fiche?.evite ?? p.data.summary}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding-top: 56px;
+    padding-bottom: 56px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 48px;
+    align-items: flex-end;
+  }
+  .hero-text {
+    flex: 1 1 460px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .hero-text h1 {
+    text-wrap: balance;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .hero-fig {
+    flex: 1 1 460px;
+    min-width: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .hero-fig img {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    background: var(--surface);
+  }
+  .themes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .themes li {
+    border-bottom: 1px solid var(--rule);
+  }
+  .themes li:first-child {
+    border-top: 2px solid var(--ink);
+  }
+  .themes a {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    gap: 8px 32px;
+    padding: 22px 0;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .themes a:hover .theme-name {
+    color: var(--accent);
+  }
+  .theme-name {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .theme-line {
+    color: var(--ink-2);
+  }
+  .theme-line .mono {
+    font-size: 13px;
+  }
+  .band .section-head {
+    border-bottom-color: #4a463f;
+  }
+  .band-lead {
+    color: var(--dark-muted);
+    margin: 0 0 32px;
+  }
+  .carnet {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+    gap: 40px 56px;
+    align-items: start;
+  }
+  .carnet-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+  .carnet-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 2px solid var(--ink);
+  }
+  .carnet-list a {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+    text-decoration: none;
+    color: var(--ink);
+    font-size: 15px;
+  }
+  .carnet-list .mono {
+    font-size: 13px;
+  }
+  .carnet-list strong {
+    font-size: 19px;
+    font-weight: 700;
+  }
+  .carnet-list a:hover strong {
+    color: var(--accent);
+  }
+</style>

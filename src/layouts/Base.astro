@@ -1,0 +1,65 @@
+---
+import { Font } from 'astro:assets';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+}
+
+const {
+  title,
+  description = 'Réparer, récupérer, fabriquer. Les projets personnels de Patrick Reybaud : instruments, machines, réparations et archives, avec les photos de l’intérieur et les fichiers pour refaire.',
+  image,
+} = Astro.props;
+const fullTitle = title ? `${title} — electro-crea` : 'electro-crea — Réparer, récupérer, fabriquer';
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = image ? new URL(image, Astro.site).href : undefined;
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#f2efe7" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="electro-crea" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <Font cssVariable="--font-sans" preload />
+    <Font cssVariable="--font-mono" />
+  </head>
+  <body>
+    <a href="#contenu" class="skip">Aller au contenu</a>
+    <Header />
+    <main id="contenu">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      // Vidéos YouTube : le lecteur ne se charge qu'au clic (aucun cookie avant).
+      document.addEventListener('click', (e) => {
+        const a = (e.target as Element).closest<HTMLAnchorElement>('a[data-yt]');
+        if (!a) return;
+        e.preventDefault();
+        const f = document.createElement('iframe');
+        const start = Number(a.dataset.start) || 0;
+        f.src = `https://www.youtube-nocookie.com/embed/${a.dataset.yt}?autoplay=1&rel=0${start ? `&start=${start}` : ''}`;
+        f.title = a.dataset.title || 'Vidéo';
+        f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+        f.allowFullscreen = true;
+        a.replaceWith(f);
+      });
+    </script>
+  </body>
+</html>

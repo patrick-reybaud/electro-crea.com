@@ -1,0 +1,17 @@
+---
+// <Image> qui accepte aussi une URL distante (ex. photo choisie dans la banque d'images de /admin).
+// Une image distante n'est pas optimisée : elle est affichée telle quelle.
+import { Image } from 'astro:assets';
+import type { ComponentProps } from 'astro/types';
+
+type Props = ComponentProps<typeof Image>;
+const props = Astro.props as Props;
+const remote = typeof props.src === 'string';
+const { src, alt, class: cls, loading = 'lazy', width, height } = props as Props & { class?: string };
+---
+
+{remote ? (
+  <img src={src as string} alt={alt} class={cls} loading={loading} decoding="async" width={width} height={height} />
+) : (
+  <Image {...props} />
+)}

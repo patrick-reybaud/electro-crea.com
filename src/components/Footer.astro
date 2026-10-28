@@ -1,0 +1,75 @@
+---
+import { getReglages } from '../lib/content';
+
+const r = await getReglages();
+---
+
+<footer id="contact" class="site-footer">
+  <div class="wrap cols">
+    <div>
+      <strong>{r.nom}</strong>
+      <span class="muted">{r.accroche}</span>
+      <span class="muted">{r.lieu}</span>
+    </div>
+    <div>
+      <strong>Contact</strong>
+      <a href={`mailto:${r.email}`}>{r.email}</a>
+      <span class="muted">Pas de formulaire, pas de réseaux sociaux. Si un fichier vous sert, ou s'il vous en manque un, un courriel suffit.</span>
+    </div>
+    <div>
+      <strong>Mes autres travaux</strong>
+      {r.autresSites.map((s) => (
+        <a href={s.url}>{s.nom}{s.description && <span class="muted"> — {s.description}</span>}</a>
+      ))}
+      {r.github && <a href={r.github}>Dépôt git</a>}
+    </div>
+  </div>
+  <div class="wrap legal">
+    <span>Textes et photos : {r.nom}, sauf mention.</span>
+    <a href="/mentions-legales/">Mentions légales</a>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 2px solid var(--ink);
+    font-size: 15px;
+  }
+  .cols {
+    padding-top: 40px;
+    padding-bottom: 28px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 32px;
+  }
+  .cols > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .cols a {
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    align-self: flex-start;
+  }
+  .cols a:hover {
+    border-bottom-color: var(--accent);
+  }
+  strong {
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .legal {
+    padding-bottom: 32px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .legal a {
+    color: var(--muted);
+  }
+</style>

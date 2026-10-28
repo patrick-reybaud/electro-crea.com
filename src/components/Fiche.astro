@@ -1,0 +1,477 @@
+---
+// Page d'une fiche (projet, réparation ou archive) : même gabarit pour les trois rubriques.
+import { getImage } from 'astro:assets';
+import { render } from 'astro:content';
+import Img from './Img.astro';
+import SpecTables from './SpecTables.astro';
+import Videos from './Videos.astro';
+import Base from '../layouts/Base.astro';
+import { periode, slugUrl, themeLabel, type Projet } from '../lib/content';
+import { RUBRIQUES } from '../content.config';
+
+interface Props {
+  projet: Projet;
+  prev?: Projet;
+  next?: Projet;
+}
+const { projet, prev, next } = Astro.props;
+const d = projet.data;
+const rub = RUBRIQUES[d.rubrique];
+const { Content } = await render(projet);
+const og = d.cover ? (await getImage({ src: d.cover, width: 1200 })).src : undefined;
+// Lien de chaque vignette vers une grande version générée au build (l'original n'est pas publié).
+const galerie = await Promise.all(
+  d.galerie.map(async (g) => ({ ...g, href: (await getImage({ src: g.src, width: Math.min(1800, g.src.width) })).src })),
+);
+const fiche = d.fiche
+  ? (
+      [
+        ['La panne', d.fiche.panne],
+        ['La cause', d.fiche.cause],
+        ['Ce qui a marché', d.fiche.solution],
+        ['Ce que ça a évité', d.fiche.evite],
+      ] as const
+    ).filter(([, v]) => v)
+  : [];
+---
+
+<Base title={d.title} description={d.summary} image={og}>
+  <div class="wrap crumbs mono">
+    <nav aria-label="Fil d'Ariane">
+      <a href="/">Accueil</a> / <a href={rub.url}>{rub.label}</a> / <span aria-current="page">{d.title}</span>
+    </nav>
+  </div>
+
+  <section class="wrap head">
+    <div class="title">
+      <p class="eyebrow">{themeLabel(d.theme)}</p>
+      <h1>{d.title}{d.draft && <span class="draft"> (brouillon)</span>}</h1>
+      <p class="lead">{d.summary}</p>
+    </div>
+    <dl class="meta">
+      <div><dt>Période</dt><dd class="mono">{periode(d)}</dd></div>
+      <div><dt>Statut</dt><dd>{d.statut}</dd></div>
+      {d.credits && <div><dt>Crédits</dt><dd>{d.credits}</dd></div>}
+    </dl>
+  </section>
+
+  {d.cover && (
+    <div class="wrap">
+      <Img src={d.cover} alt={d.coverAlt ?? d.title} widths={[800, 1200, 1800]} sizes="(min-width: 1200px) 1152px, 100vw" class="cover" loading="eager" />
+      {d.coverAlt && <p class="caption">{d.coverAlt}</p>}
+    </div>
+  )}
+
+  {fiche.length > 0 && (
+    <section class="wrap section-tight">
+      <dl class="fiche">
+        {fiche.map(([k, v]) => (
+          <div>
+            <dt class="mono">{k}</dt>
+            <dd>{v}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  )}
+
+  <section class="wrap section-tight body">
+    <div class="text">
+      <div class="prose"><Content /></div>
+      {d.avertissement && <p class="warn"><strong>Attention.</strong> {d.avertissement}</p>}
+    </div>
+    {d.specs.length > 0 && (
+      <aside class="specs">
+        <SpecTables specs={d.specs} />
+      </aside>
+    )}
+  </section>
+
+  {(d.videos.length > 0 || d.clips.length > 0) && (
+    <section class="wrap section-tight">
+      <h2 class="sub-top">Vidéos</h2>
+      {d.clips.length > 0 && (
+        <div class="clips">
+          {d.clips.map((c) => (
+            <figure>
+              <video controls preload="metadata" playsinline poster={c.poster} src={c.src}></video>
+              {c.legende && <figcaption class="caption">{c.legende}</figcaption>}
+            </figure>
+          ))}
+        </div>
+      )}
+      {d.videos.length > 0 && <Videos videos={d.videos} />}
+    </section>
+  )}
+
+  {galerie.length > 0 && (
+    <section class="wrap section-tight">
+      <h2 class="sub-top">Photos</h2>
+      <div class="gallery">
+        {galerie.map((g, i) => (
+          <figure>
+            <a href={g.href} data-lb={i} data-alt={g.alt} data-legende={g.legende ?? ''}><Img src={g.src} alt={g.alt} widths={[400, 800]} sizes="(min-width: 960px) 380px, 100vw" /></a>
+            {g.legende && <figcaption class="caption">{g.legende}</figcaption>}
+          </figure>
+        ))}
+      </div>
+      <dialog class="lb" aria-label="Photo en grand">
+        <button type="button" class="lb-close" data-lb-close aria-label="Fermer">✕</button>
+        <button type="button" class="lb-nav lb-prev" data-lb-prev aria-label="Photo précédente">‹</button>
+        <figure>
+          <img alt="" />
+          <figcaption class="mono"><span class="lb-count"></span> <span class="lb-text"></span></figcaption>
+        </figure>
+        <button type="button" class="lb-nav lb-next" data-lb-next aria-label="Photo suivante">›</button>
+      </dialog>
+    </section>
+  )}
+
+  {(d.sources.length > 0 || d.licence) && (
+    <section class="wrap section-tight">
+      <h2 class="sub-top">Fichiers et sources</h2>
+      <div class="sources">
+        {d.sources.map((s) => (
+          <a href={s.url} class="source">
+            <strong>{s.label}</strong>
+            <span class="mono">{s.url.replace(/^https?:\/\/(www\.)?/, '')}</span>
+            {s.description && <span class="muted">{s.description}</span>}
+          </a>
+        ))}
+      </div>
+      {d.licence && <p class="muted licence">Licence : {d.licence}</p>}
+    </section>
+  )}
+
+  <nav aria-label="Fiches voisines" class="wrap pager">
+    {prev ? <a href={slugUrl(prev)}>← {prev.data.title}</a> : <span></span>}
+    {next ? <a href={slugUrl(next)}>{next.data.title} →</a> : <span></span>}
+  </nav>
+</Base>
+
+<script>
+  // Visionneuse de la galerie : clic = ouverture, flèches = navigation, Échap / ✕ / clic hors image = fermeture.
+  // Sans JavaScript, le lien mène à la grande image.
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.gallery a[data-lb]'));
+  const dlg = document.querySelector<HTMLDialogElement>('dialog.lb');
+  if (dlg && links.length > 0 && typeof dlg.showModal === 'function') {
+    const img = dlg.querySelector('img')!;
+    const count = dlg.querySelector('.lb-count')!;
+    const text = dlg.querySelector('.lb-text')!;
+    let cur = 0;
+    const show = (i: number) => {
+      cur = (i + links.length) % links.length;
+      const a = links[cur];
+      img.src = a.href;
+      img.alt = a.dataset.alt ?? '';
+      count.textContent = `${cur + 1} / ${links.length}`;
+      text.textContent = a.dataset.legende || a.dataset.alt || '';
+      // Précharge les voisines pour que les flèches répondent tout de suite.
+      for (const j of [cur + 1, cur - 1]) new Image().src = links[(j + links.length) % links.length].href;
+    };
+    links.forEach((a, i) =>
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        show(i);
+        dlg.showModal();
+      }),
+    );
+    dlg.querySelector('[data-lb-prev]')!.addEventListener('click', () => show(cur - 1));
+    dlg.querySelector('[data-lb-next]')!.addEventListener('click', () => show(cur + 1));
+    dlg.querySelector('[data-lb-close]')!.addEventListener('click', () => dlg.close());
+    dlg.addEventListener('click', (e) => {
+      if (e.target === dlg || e.target === dlg.querySelector('figure')) dlg.close();
+    });
+    dlg.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') show(cur + 1);
+      else if (e.key === 'ArrowLeft') show(cur - 1);
+    });
+    // Balayage au doigt.
+    let x0 = 0;
+    dlg.addEventListener('touchstart', (e) => (x0 = e.touches[0].clientX), { passive: true });
+    dlg.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - x0;
+      if (Math.abs(dx) > 50) show(dx < 0 ? cur + 1 : cur - 1);
+    });
+  }
+</script>
+
+<style>
+  .crumbs {
+    padding-top: 28px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .crumbs a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .crumbs a:hover {
+    color: var(--accent);
+  }
+  .head {
+    padding-top: 20px;
+    padding-bottom: 36px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px 48px;
+  }
+  .title {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1 1 520px;
+    min-width: 0;
+  }
+  .title h1 {
+    text-wrap: balance;
+    max-width: 16ch;
+  }
+  .lead {
+    margin: 0;
+    max-width: 760px;
+    font-size: 21px;
+  }
+  .draft {
+    font-size: 0.4em;
+    font-weight: 400;
+    color: var(--accent);
+  }
+  .meta {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 40px;
+    font-size: 15px;
+  }
+  .meta dt {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .meta dd {
+    margin: 4px 0 0;
+  }
+  .cover {
+    width: 100%;
+    max-height: 640px;
+    object-fit: cover;
+    background: var(--surface);
+  }
+  .caption {
+    margin: 10px 0 0;
+  }
+  .fiche {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0 24px;
+    border-top: 2px solid var(--ink);
+  }
+  .fiche div {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .fiche dt {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .fiche dd {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 56px;
+    padding-top: 24px;
+  }
+  .text {
+    flex: 1 1 460px;
+    min-width: 0;
+  }
+  .specs {
+    flex: 1 1 320px;
+    min-width: 0;
+    max-width: 440px;
+    border-top: 2px solid var(--ink);
+  }
+  .warn {
+    margin: 32px 0 0;
+    max-width: 70ch;
+    padding: 16px 20px;
+    border: 2px solid var(--accent);
+    color: var(--ink);
+    font-size: 16px;
+  }
+  .sub-top {
+    font-size: 1.6rem;
+    margin-bottom: 24px;
+  }
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .gallery figure {
+    margin: 0;
+  }
+  .gallery img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: var(--surface);
+  }
+  .gallery figcaption {
+    margin-top: 8px;
+  }
+  .gallery a {
+    display: block;
+    cursor: zoom-in;
+  }
+  .clips {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 460px), 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  .clips figure {
+    margin: 0;
+  }
+  .clips video {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    display: block;
+  }
+  .clips figcaption {
+    margin-top: 8px;
+  }
+  /* Visionneuse : une photo en grand, flèches, Échap ou clic hors de l'image pour sortir. */
+  .lb {
+    border: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    background: rgba(27, 26, 23, 0.96);
+    color: var(--dark-text);
+  }
+  .lb::backdrop {
+    background: transparent;
+  }
+  .lb figure {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 56px 72px 24px;
+    box-sizing: border-box;
+  }
+  .lb img {
+    max-width: 100%;
+    max-height: calc(100vh - 120px);
+    object-fit: contain;
+    background: #000;
+  }
+  .lb figcaption {
+    font-size: 13px;
+    color: var(--dark-muted);
+    text-align: center;
+    max-width: 70ch;
+  }
+  .lb button {
+    position: absolute;
+    border: 0;
+    background: transparent;
+    color: var(--dark-text);
+    font-size: 44px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 12px 20px;
+  }
+  .lb button:hover {
+    color: var(--dark-accent);
+  }
+  .lb-close {
+    top: 8px;
+    right: 12px;
+    font-size: 28px;
+  }
+  .lb-nav {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .lb-prev {
+    left: 4px;
+  }
+  .lb-next {
+    right: 4px;
+  }
+  @media (max-width: 600px) {
+    .lb figure {
+      padding: 48px 8px 16px;
+    }
+    .lb-nav {
+      top: auto;
+      bottom: 4px;
+      transform: none;
+    }
+  }
+  .sources {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .source {
+    border: 2px solid var(--ink);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .source:hover {
+    border-color: var(--accent);
+    color: var(--ink);
+  }
+  .source .mono {
+    font-size: 13px;
+    color: var(--accent);
+    overflow-wrap: anywhere;
+  }
+  .source .muted {
+    font-size: 14px;
+  }
+  .licence {
+    margin-top: 16px;
+    font-size: 14px;
+  }
+  .pager {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+    border-top: 2px solid var(--ink);
+    padding-top: 24px;
+    padding-bottom: 56px;
+    font-weight: 700;
+  }
+  .pager a {
+    text-decoration: none;
+  }
+</style>

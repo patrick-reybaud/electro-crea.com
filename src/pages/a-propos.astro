@@ -1,0 +1,150 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import { getReglages } from '../lib/content';
+import photo from '../assets/a-propos.jpg';
+
+const r = await getReglages();
+const reperes = [
+  ['1994–2009', 'Planeurs, téléphérique, premières machines'],
+  ['2009–2018', 'Robots de compétition avec Pacabot'],
+  ['2013–2014', 'Réparation de matériel audio et vidéo professionnel'],
+  ['Depuis 2014', 'Électronique embarquée dans une entreprise marseillaise'],
+  ['Depuis 2018', 'Sp3ctra, instrument opto-sonore, avec Ondulab et Réso-nance'],
+];
+---
+
+<Base title="À propos" description="Patrick Reybaud, Marseille. Trente ans d'électronique, le jour pour une entreprise, le reste du temps pour réparer, récupérer et fabriquer.">
+  <section class="wrap section-tight">
+    <p class="eyebrow">À propos</p>
+    <h1 class="titre">Patrick Reybaud</h1>
+  </section>
+
+  <section class="wrap deux">
+    <figure class="photo">
+      <Image src={photo} alt="Patrick Reybaud de profil, casque sur les oreilles, penché sur un synthétiseur modulaire ; derrière lui un écran LED affiche le flux lumineux de Sp3ctra" widths={[600, 900, 1134]} sizes="(min-width: 900px) 560px, 100vw" loading="eager" />
+      <figcaption class="caption">SerpentNu, concert d'improvisation avec le Cabinet BOA, 2024.</figcaption>
+    </figure>
+    <div class="prose">
+      <p>
+        Je m'appelle Patrick Reybaud. Je vis à Marseille et je conçois des systèmes électroniques depuis une trentaine
+        d'années, le jour pour une entreprise, le reste du temps pour moi. Passionné d'ingénierie et d'art numérique,
+        j'aime démonter, réparer et créer, avec autant que possible des pièces et du matériel de réemploi.
+      </p>
+      <p>
+        J'ai commencé à 8 ans avec des planeurs en balsa et un téléphérique de jardin construit avec ce que je trouvais.
+        J'ai gardé cette habitude : avant d'acheter, je regarde ce qui traîne, et avant de jeter, j'ouvre. Un
+        magnétophone de 1970, une batterie d'aspirateur, un objectif photo : presque tout se répare, et le faire
+        soi-même apprend plus que n'importe quel cours.
+      </p>
+      <p>
+        Ce site rassemble ce travail personnel. Il ne parle ni de mon métier, ni d'<a href="https://ondulab.com">Ondulab</a>,
+        l'instrument Sp3ctra que je développe avec Réso-nance, ni de <a href="https://pacabot.com">Pacabot</a>, le club
+        de robotique où j'ai passé dix-huit ans. Ces deux-là ont leur propre site.
+      </p>
+      <p>
+        Quand c'est possible, je publie les fichiers : schémas KiCad, pièces FreeCAD, code. Si l'un d'eux vous sert à
+        réparer quelque chose, écrivez-moi, ça me fera plaisir.
+      </p>
+    </div>
+  </section>
+
+  <section class="wrap section-tight deux">
+    <div>
+      <h2 class="sous mono">Repères</h2>
+      <dl class="reperes">
+        {reperes.map(([a, t]) => (
+          <div>
+            <dt class="mono">{a}</dt>
+            <dd>{t}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+    <div class="contact">
+      <h2 class="sous mono">Contact</h2>
+      <a href={`mailto:${r.email}`} class="mail">{r.email}</a>
+      <p class="muted">Pas de formulaire, pas de réseaux sociaux. Si un fichier vous sert, ou s'il vous en manque un, un courriel suffit.</p>
+      <div class="liens">
+        {r.autresSites.map((s) => <a href={s.url}>{s.nom}{s.description && ` (${s.description})`}</a>)}
+        <a href="https://reso-nance.org">Réso-nance</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .titre {
+    margin-top: 12px;
+  }
+  .deux {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(440px, 100%), 1fr));
+    gap: 48px;
+    align-items: start;
+  }
+  .photo {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .photo img {
+    width: 100%;
+    background: var(--surface);
+  }
+  .sous {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 14px 0;
+    border-top: 2px solid var(--ink);
+    margin: 0;
+  }
+  .reperes {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  .reperes div {
+    display: grid;
+    grid-template-columns: 130px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .reperes div:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+  .reperes dt {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .reperes dd {
+    margin: 0;
+  }
+  .contact {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .mail {
+    font-size: 22px;
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 2px solid var(--accent);
+    align-self: flex-start;
+    overflow-wrap: anywhere;
+  }
+  .contact p {
+    margin: 0;
+  }
+  .liens {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    padding-top: 8px;
+    font-size: 15px;
+  }
+</style>

@@ -1,0 +1,100 @@
+---
+import Base from '../../layouts/Base.astro';
+import Img from '../../components/Img.astro';
+import { getProjets, periode, slugUrl } from '../../lib/content';
+
+const archives = await getProjets('archive');
+---
+
+<Base title="Archives, 1994–2008" description="Avant les cartes électroniques : un téléphérique de jardin construit en récupération, des planeurs en balsa, une table de découpe au fil chaud.">
+  <section class="wrap section-tight">
+    <p class="eyebrow">Archives</p>
+    <h1 class="titre">1994–2008</h1>
+    <p class="lead">
+      Avant les cartes électroniques, il y a eu le balsa, les câbles et les moteurs de récupération. Les photos de ces
+      années sont des tirages numérisés bien plus tard : les dates sont celles des projets, pas celles des fichiers.
+    </p>
+  </section>
+
+  <section class="wrap">
+    <ol class="fiches">
+      {archives.map((p, i) => (
+        <li>
+          <a href={slugUrl(p)} class="fiche" class:list={{ inverse: i % 2 === 1 }}>
+            {p.data.cover ? (
+              <Img src={p.data.cover} alt={p.data.coverAlt ?? p.data.title} widths={[400, 640, 800]} sizes="(min-width: 900px) 480px, 100vw" class="cover" loading={i === 0 ? 'eager' : 'lazy'} />
+            ) : (
+              <div class="cover placeholder"><span class="mono">Photo à venir</span></div>
+            )}
+            <div class="texte">
+              <span class="mono muted">{periode(p.data)}</span>
+              <h2>{p.data.title}</h2>
+              <p>{p.data.summary}</p>
+            </div>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </section>
+</Base>
+
+<style>
+  .titre {
+    margin: 12px 0 16px;
+  }
+  .fiches {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 48px;
+    display: flex;
+    flex-direction: column;
+  }
+  .fiche {
+    display: grid;
+    grid-template-columns: minmax(0, 480px) minmax(0, 1fr);
+    gap: 32px;
+    padding: 32px 0;
+    border-top: 2px solid var(--ink);
+    text-decoration: none;
+    color: var(--ink);
+    align-items: center;
+  }
+  .fiche:hover h2 {
+    color: var(--accent);
+  }
+  .cover {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    background: var(--surface);
+  }
+  .placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed var(--muted);
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .texte {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .texte h2 {
+    font-size: clamp(1.6rem, 2vw + 0.5rem, 2.2rem);
+    text-wrap: balance;
+  }
+  .texte p {
+    margin: 0;
+    color: var(--ink-2);
+    max-width: 60ch;
+    font-size: 18px;
+  }
+  @media (max-width: 700px) {
+    .fiche {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+</style>

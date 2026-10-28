@@ -1,0 +1,93 @@
+---
+import { getReglages } from '../lib/content';
+
+const r = await getReglages();
+const path = Astro.url.pathname;
+const items = [
+  { href: '/projets/', label: 'Projets' },
+  { href: '/reparations/', label: 'Réparations' },
+  { href: '/archives/', label: 'Archives' },
+  { href: '/a-propos/', label: 'À propos' },
+];
+const isCurrent = (href: string) => path.startsWith(href);
+---
+
+<header class="site-header">
+  <div class="wrap bar">
+    <p class="brand">
+      <a href="/" class="name" aria-label="electro-crea, accueil">electro-crea</a>
+      <span class="tagline mono">{r.accroche}</span>
+    </p>
+    <nav aria-label="Navigation principale">
+      {items.map((it) => (
+        <a href={it.href} aria-current={isCurrent(it.href) ? 'page' : undefined}>{it.label}</a>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    border-bottom: 2px solid var(--ink);
+  }
+  .bar {
+    padding-top: 22px;
+    padding-bottom: 22px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 32px;
+  }
+  .brand {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    color: var(--ink);
+  }
+  .name {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .name:hover {
+    color: var(--accent);
+  }
+  .tagline {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 28px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  nav a {
+    color: var(--ink);
+    text-decoration: none;
+    padding: 10px 0;
+    border-bottom: 2px solid transparent;
+  }
+  nav a:hover {
+    color: var(--accent);
+  }
+  nav a[aria-current='page'] {
+    color: var(--accent);
+  }
+  @media (max-width: 600px) {
+    .tagline {
+      display: none;
+    }
+    nav {
+      gap: 4px 18px;
+      font-size: 15px;
+    }
+  }
+</style>

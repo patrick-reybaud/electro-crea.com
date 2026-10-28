@@ -1,0 +1,25 @@
+---
+// Section « Vidéos » d'un projet ou d'une actualité (champ `videos` du frontmatter).
+import { parseYouTube, youTubeHtml } from '../lib/youtube.mjs';
+
+interface Props {
+  videos: { url: string; titre?: string }[];
+}
+const items = Astro.props.videos
+  .map((v) => ({ yt: parseYouTube(v.url), titre: v.titre }))
+  .filter((v) => v.yt !== null);
+---
+
+{items.length > 0 && (
+  <div class="videos">
+    {items.map((v) => <Fragment set:html={youTubeHtml(v.yt!, v.titre ?? 'Vidéo')} />)}
+  </div>
+)}
+
+<style>
+  .videos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 460px), 1fr));
+    gap: 24px;
+  }
+</style>

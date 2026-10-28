@@ -1,0 +1,22 @@
+# Carnet de réparations : une ligne par appareil réparé sans fiche détaillée.
+# `tri` sert au classement (AAAAMM). `projet` = identifiant d'une fiche, pour y renvoyer.
+- date: "2024-12"
+  tri: 202412
+  appareil: "Meuleuse d'angle"
+  resultat: "Remise en service"
+- date: "2024-09"
+  tri: 202409
+  appareil: "Projecteur de cinéma"
+  resultat: "Remis en service"
+- date: "2023-10"
+  tri: 202310
+  appareil: "Perceuse Bosch"
+  resultat: "Remise en service"
+- date: "2023-03"
+  tri: 202303
+  appareil: "Chaudière"
+  resultat: "Remise en service"
+- date: "2022-02"
+  tri: 202202
+  appareil: "Casque audio"
+  resultat: "Remis en service"

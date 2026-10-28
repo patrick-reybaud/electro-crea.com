@@ -1,0 +1,18 @@
+---
+import Fiche from '../../components/Fiche.astro';
+import { getProjets, type Projet } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const tous = await getProjets('archive');
+  return tous.map((projet, i) => ({ params: { slug: projet.id }, props: { projet, prev: tous[i - 1], next: tous[i + 1] } }));
+}
+
+interface Props {
+  projet: Projet;
+  prev?: Projet;
+  next?: Projet;
+}
+const { projet, prev, next } = Astro.props;
+---
+
+<Fiche projet={projet} prev={prev} next={next} />

@@ -1,0 +1,147 @@
+# Interface d'édition du site (Sveltia CMS) : https://electro-crea.com/admin/
+# Chaque enregistrement crée un commit dans le dépôt GitHub ; le site est ensuite reconstruit et publié.
+# Les champs reprennent le schéma de src/content.config.ts : les garder synchronisés.
+
+backend:
+  name: github
+  repo: patrick-reybaud/electro-crea.com
+  branch: main
+
+locale: fr
+site_url: https://electro-crea.com
+display_url: https://electro-crea.com
+logo_url: /favicon.svg
+
+slug:
+  encoding: ascii
+  clean_accents: true
+  sanitize_replacement: '-'
+
+media_folder: public/uploads
+public_folder: /uploads
+
+collections:
+  - name: projets
+    label: Fiches
+    label_singular: Fiche
+    description: Projets, réparations et archives. La rubrique décide de la page où la fiche apparaît ; une fiche reste en brouillon tant que la case « Brouillon » est cochée.
+    folder: src/content/projets
+    path: '{{slug}}/index'
+    media_folder: ''
+    public_folder: ''
+    extension: md
+    format: frontmatter
+    create: true
+    identifier_field: title
+    summary: '{{title}} — {{rubrique}}'
+    sortable_fields: [title, debut, ordre]
+    fields:
+      - { name: title, label: Titre, widget: string }
+      - { name: summary, label: Chapeau (une ou deux phrases), widget: text }
+      - { name: rubrique, label: Rubrique, widget: select, default: projet, options: [{ label: Projet, value: projet }, { label: Réparation, value: reparation }, { label: Archive, value: archive }] }
+      - { name: theme, label: Thème, widget: select, options: [{ label: Instruments et son, value: son }, { label: Art et installations, value: art }, { label: Radiocommande et vol, value: vol }, { label: Image et photo, value: photo }, { label: Atelier et mesure, value: atelier }, { label: Maison, value: maison }] }
+      - { name: debut, label: Année de début, widget: number, value_type: int }
+      - { name: fin, label: Année de fin, widget: number, value_type: int, required: false }
+      - { name: statut, label: Statut, widget: select, default: terminé, options: [en cours, terminé, en pause, abandonné, régulier] }
+      - { name: cover, label: Photo principale, widget: image, required: false }
+      - { name: coverAlt, label: Description de la photo principale, widget: string, required: false }
+      - name: galerie
+        label: Galerie
+        widget: list
+        required: false
+        fields:
+          - { name: src, label: Photo, widget: image }
+          - { name: alt, label: Description, widget: string }
+          - { name: legende, label: Légende, widget: string, required: false }
+      - name: clips
+        label: Vidéos courtes (fichiers MP4 du site)
+        widget: list
+        required: false
+        fields:
+          - { name: src, label: Fichier MP4 (chemin /clips/...), widget: string }
+          - { name: poster, label: Image d'attente (chemin /clips/...), widget: string, required: false }
+          - { name: legende, label: Légende, widget: string, required: false }
+      - name: videos
+        label: Vidéos YouTube
+        widget: list
+        required: false
+        hint: 'Ou collez simplement un lien YouTube seul sur une ligne du texte.'
+        fields:
+          - { name: url, label: Lien YouTube, widget: string }
+          - { name: titre, label: Titre, widget: string, required: false }
+      - name: specs
+        label: Fiche technique
+        widget: list
+        required: false
+        summary: '{{fields.groupe}}'
+        fields:
+          - { name: groupe, label: Groupe, widget: string }
+          - name: lignes
+            label: Lignes
+            widget: list
+            summary: '{{fields.label}} : {{fields.valeur}}'
+            fields:
+              - { name: label, label: Caractéristique, widget: string }
+              - { name: valeur, label: Valeur, widget: string }
+      - name: fiche
+        label: Réparation en quatre lignes
+        widget: object
+        required: false
+        collapsed: true
+        fields:
+          - { name: panne, label: La panne, widget: text, required: false }
+          - { name: cause, label: La cause, widget: text, required: false }
+          - { name: solution, label: Ce qui a marché, widget: text, required: false }
+          - { name: evite, label: Ce que ça a évité, widget: string, required: false }
+      - { name: avertissement, label: Avertissement (encadré), widget: text, required: false }
+      - name: sources
+        label: Fichiers et sources
+        widget: list
+        required: false
+        fields:
+          - { name: label, label: Libellé, widget: string }
+          - { name: url, label: Lien, widget: string }
+          - { name: description, label: Description, widget: string, required: false }
+      - { name: licence, label: Licence des fichiers, widget: string, required: false }
+      - { name: credits, label: Crédits (artiste, photographe…), widget: string, required: false }
+      - { name: aLaUne, label: À la une sur l'accueil, widget: boolean, default: false }
+      - { name: ordre, label: Ordre (plus petit = premier), widget: number, value_type: int, default: 100 }
+      - { name: draft, label: Brouillon, widget: boolean, default: true }
+      - { name: body, label: Récit, widget: markdown }
+
+  - name: donnees
+    label: Réglages
+    files:
+      - name: reglages
+        label: Site
+        file: src/data/reglages.yaml
+        fields:
+          - name: site
+            label: Site
+            widget: object
+            fields:
+              - { name: nom, label: Nom, widget: string }
+              - { name: email, label: E-mail de contact, widget: string }
+              - { name: lieu, label: Lieu, widget: string }
+              - { name: accroche, label: Accroche (sous le nom du site), widget: string }
+              - { name: directeurPublication, label: Directeur de la publication, widget: string }
+              - name: autresSites
+                label: Autres sites
+                widget: list
+                fields:
+                  - { name: nom, label: Nom, widget: string }
+                  - { name: url, label: Adresse, widget: string }
+                  - { name: description, label: Description, widget: string, required: false }
+              - { name: github, label: Dépôts (GitHub), widget: string, required: false }
+      - name: carnet
+        label: Carnet (lignes sans fiche)
+        file: src/data/carnet.yaml
+        fields:
+          - name: lignes
+            label: Réparations
+            widget: list
+            fields:
+              - { name: date, label: Date affichée, widget: string, hint: 'Ex. 2024-12' }
+              - { name: tri, label: Tri (AAAAMM), widget: number, value_type: int }
+              - { name: appareil, label: Appareil, widget: string }
+              - { name: resultat, label: Résultat, widget: string }

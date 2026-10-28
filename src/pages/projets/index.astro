@@ -1,0 +1,62 @@
+---
+import Base from '../../layouts/Base.astro';
+import ProjetCard from '../../components/ProjetCard.astro';
+import { getProjets } from '../../lib/content';
+import { THEMES } from '../../content.config';
+
+const projets = await getProjets('projet');
+const themes = (Object.keys(THEMES) as (keyof typeof THEMES)[])
+  .map((k) => ({ key: k, ...THEMES[k], fiches: projets.filter((p) => p.data.theme === k) }))
+  .filter((t) => t.fiches.length > 0);
+---
+
+<Base title="Projets" description="Instruments, machines, objectifs et boîtiers photo, quadricoptère : les projets personnels de Patrick Reybaud, avec les photos de l'intérieur et les fichiers.">
+  <section class="wrap section-tight">
+    <p class="eyebrow">Projets</p>
+    <h1 class="titre">Ce que je construis, transforme ou remets en service.</h1>
+    <p class="lead">
+      Un chapeau, le récit, les photos de l'intérieur et, quand c'est possible, les fichiers : schémas KiCad, pièces
+      FreeCAD, code.
+    </p>
+    <nav class="sommaire mono" aria-label="Thèmes">
+      {themes.map((t) => (
+        <a href={`#${t.key}`}>{t.label} ({t.fiches.length})</a>
+      ))}
+    </nav>
+  </section>
+
+  {themes.map((t) => (
+    <section class="wrap section-tight" id={t.key} aria-labelledby={`h-${t.key}`}>
+      <div class="section-head">
+        <h2 id={`h-${t.key}`}>{t.label}</h2>
+        <span class="muted">{t.ligne}</span>
+      </div>
+      <div class="cards">{t.fiches.map((p) => <ProjetCard projet={p} meta="rubrique" />)}</div>
+    </section>
+  ))}
+</Base>
+
+<style>
+  .titre {
+    margin: 12px 0 16px;
+    max-width: 18ch;
+    text-wrap: balance;
+  }
+  .sommaire {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    margin-top: 24px;
+    font-size: 13px;
+  }
+  .sommaire a {
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+  }
+  .sommaire a:hover {
+    border-bottom-color: var(--accent);
+  }
+  .section-head .muted {
+    font-size: 15px;
+  }
+</style>

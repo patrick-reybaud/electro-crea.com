@@ -1,0 +1,135 @@
+---
+import Base from '../../layouts/Base.astro';
+import Img from '../../components/Img.astro';
+import { getCarnet, getProjets, periode, slugUrl } from '../../lib/content';
+
+const fiches = await getProjets('reparation');
+const carnet = await getCarnet();
+// Tableau complet : les fiches détaillées et les lignes du carnet, du plus récent au plus ancien.
+const lignes = [
+  ...fiches.map((p) => ({
+    date: periode(p.data),
+    tri: (p.data.fin ?? p.data.debut) * 100 + 99,
+    appareil: p.data.title,
+    resultat: p.data.fiche?.evite ?? p.data.summary,
+    url: slugUrl(p),
+  })),
+  ...carnet.map((l) => ({ ...l.data, url: undefined })),
+].sort((a, b) => b.tri - a.tri);
+---
+
+<Base title="Carnet de réparations" description="Les appareils de la maison, ouverts plutôt que jetés : pour chacun, la panne, la cause, ce qui a marché et ce que ça a évité.">
+  <section class="wrap section-tight">
+    <p class="eyebrow">Réparations</p>
+    <h1 class="titre">Carnet de réparations</h1>
+    <p class="lead">
+      Les appareils de la maison, ouverts plutôt que jetés. Pour chacun : la panne, la cause, ce qui a marché, et ce que
+      ça a coûté par rapport au neuf. Un appareil en panne est presque toujours un appareil réparable.
+    </p>
+  </section>
+
+  <section class="wrap">
+    <ol class="fiches">
+      {fiches.map((p) => (
+        <li>
+          <a href={slugUrl(p)} class="fiche">
+            {p.data.cover ? (
+              <Img src={p.data.cover} alt={p.data.coverAlt ?? p.data.title} widths={[400, 640, 800]} sizes="(min-width: 900px) 380px, 100vw" class="cover" />
+            ) : (
+              <div class="cover placeholder"><span class="mono">Photo à venir</span></div>
+            )}
+            <div class="texte">
+              <span class="mono muted">{periode(p.data)}</span>
+              <h2>{p.data.title}</h2>
+              <p>{p.data.summary}</p>
+              {p.data.fiche?.evite && <span class="evite mono">{p.data.fiche.evite}</span>}
+            </div>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="wrap section-tight">
+    <div class="section-head">
+      <h2>Toutes les réparations</h2>
+      <span class="mono muted">{lignes.length} appareils</span>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Date</th><th>Appareil</th><th>Résultat</th></tr></thead>
+        <tbody>
+          {lignes.map((l) => (
+            <tr>
+              <td class="date">{l.date}</td>
+              <td>{l.url ? <a href={l.url}>{l.appareil}</a> : l.appareil}</td>
+              <td>{l.resultat}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .titre {
+    margin: 12px 0 16px;
+  }
+  .fiches {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .fiche {
+    display: grid;
+    grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+    gap: 32px;
+    padding: 32px 0;
+    border-top: 2px solid var(--ink);
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .fiche:hover h2 {
+    color: var(--accent);
+  }
+  .cover {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: var(--surface);
+  }
+  .placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed var(--muted);
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .texte {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .texte h2 {
+    font-size: clamp(1.6rem, 2vw + 0.5rem, 2.2rem);
+  }
+  .texte p {
+    margin: 0;
+    color: var(--ink-2);
+    max-width: 60ch;
+  }
+  .evite {
+    font-size: 13px;
+    color: var(--accent);
+  }
+  @media (max-width: 700px) {
+    .fiche {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+</style>

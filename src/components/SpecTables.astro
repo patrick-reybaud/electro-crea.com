@@ -1,0 +1,55 @@
+---
+import type { Projet } from '../lib/content';
+
+interface Props {
+  specs: Projet['data']['specs'];
+}
+const { specs } = Astro.props;
+---
+
+{specs.map((g) => (
+  <table class="spec">
+    <caption>{g.groupe}</caption>
+    <tbody>
+      {g.lignes.map((l) => (
+        <tr>
+          <th scope="row">{l.label}</th>
+          <td>{l.valeur}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+))}
+
+<style>
+  .spec {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+  }
+  caption {
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 24px 0 8px;
+  }
+  th {
+    text-align: left;
+    font-weight: 400;
+    color: var(--muted);
+    padding: 10px 16px 10px 0;
+    border-bottom: 1px solid var(--rule);
+    width: 42%;
+    vertical-align: top;
+  }
+  td {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    vertical-align: top;
+  }
+</style>

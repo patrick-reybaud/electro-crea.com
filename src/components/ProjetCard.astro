@@ -1,0 +1,90 @@
+---
+import Img from './Img.astro';
+import { periode, slugUrl, themeLabel, type Projet } from '../lib/content';
+import { RUBRIQUES } from '../content.config';
+
+interface Props {
+  projet: Projet;
+  // « theme » : affiche le thème (page d'accueil) ; « rubrique » : affiche la rubrique (page des thèmes).
+  meta?: 'theme' | 'rubrique';
+  eager?: boolean;
+}
+const { projet, meta = 'theme', eager = false } = Astro.props;
+const d = projet.data;
+const etiquette = meta === 'theme' ? themeLabel(d.theme) : RUBRIQUES[d.rubrique].label;
+---
+
+<a href={slugUrl(projet)} class="card">
+  {d.cover ? (
+    <Img src={d.cover} alt={d.coverAlt ?? d.title} widths={[400, 640, 800]} sizes="(min-width: 1200px) 360px, (min-width: 640px) 45vw, 100vw" class="cover" loading={eager ? 'eager' : 'lazy'} />
+  ) : (
+    <div class="cover placeholder"><span class="mono">Photo à venir</span></div>
+  )}
+  <span class="mono meta">{periode(d)} · {etiquette}</span>
+  <strong>{d.title}{d.draft && <span class="draft"> (brouillon)</span>}</strong>
+  <span class="summary">{d.summary}</span>
+</a>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .card:hover strong {
+    color: var(--accent);
+  }
+  .cover {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: var(--surface);
+  }
+  .placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed var(--muted);
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .meta {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  strong {
+    font-size: 23px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  .summary {
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+  .draft {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--accent);
+  }
+  /* Sur un bandeau sombre (archives de l'accueil), le texte passe en clair. */
+  :global(.band) .card {
+    color: var(--dark-text);
+  }
+  :global(.band) .summary,
+  :global(.band) .meta,
+  :global(.band) .placeholder {
+    color: var(--dark-muted);
+  }
+  :global(.band) .placeholder {
+    background: #34312b;
+    border-color: #8c8676;
+  }
+  :global(.band) .card:hover strong {
+    color: var(--dark-accent);
+  }
+</style>
